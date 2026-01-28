@@ -1,0 +1,124 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: postgres
+    volumes:
+      - ../migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}"
+    command: postgres -c port=${DB_PORT}
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:9.11
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_USER}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASS}
+      PGADMIN_LISTEN_PORT: ${PG_ADMIN_PORT}
+    ports:
+      - "8080:${PG_ADMIN_PORT}"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  migrations:
+    container_name: migrations
+    build:
+      context: ../
+      dockerfile: docker/migrations.Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_DIALECT: ${DB_DIALECT}
+    entrypoint: /bin/sh -c
+    command:
+      - ./migrations/migrate.sh
+    restart: no
+    read_only: true
+
+  redis:
+    image: redis:8.4-alpine
+    container_name: redis
+    depends_on:
+      - postgres
+    restart: always
+    ports:
+      - "${REDIS_PORT}"
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_SECURE} --port ${REDIS_PORT}
+    volumes:
+      - redis:/var/lib/redis
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:${KAFKA_CONTROLLER_PORT}
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:${KAFKA_PORT},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_PORT: ${KAFKA_PORT}
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "tg.incoming:1:1,tg.outgoing:1:1"
+    ports:
+      - "${KAFKA_PORT}:${KAFKA_PORT}"
+      - "${KAFKA_CONTROLLER_PORT}:${KAFKA_CONTROLLER_PORT}"
+    restart: unless-stopped
+
+  kafka-init:
+    image: apache/kafka:3.7.0
+    container_name: kafka-init
+    depends_on:
+      - kafka
+    volumes:
+      - ./create-topics.sh:/create-topics.sh
+    environment:
+      KAFKA_HOST: ${KAFKA_HOST}
+      KAFKA_PORT: ${KAFKA_PORT}
+    entrypoint: ["/bin/bash","/create-topics.sh"]
+    restart: no
+
+  app:
+    container_name: app
+    build:
+      context: ../
+      dockerfile: docker/app.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+      kafka-init:
+        condition: service_completed_successfully
+    env_file:
+      - ../.env
+    ports:
+      - "${LISTEN_PORT}:${LISTEN_PORT}"
+    restart: no
+    read_only: true
+
+volumes:
+  db-data:
+  pgadmin-data:
+  redis:

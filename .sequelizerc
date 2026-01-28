@@ -1,0 +1,13 @@
+const path = require("path");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+const migrationsDir = "./migrations";
+
+module.exports = {
+	config: path.join(migrationsDir,"config.js"),
+	"models-path": "./src/models",
+	"migrations-path": path.join(migrationsDir,"migrations"),
+	"seeders-path": path.join(migrationsDir,"seeders"),
+};
