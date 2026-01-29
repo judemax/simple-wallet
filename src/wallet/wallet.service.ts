@@ -11,7 +11,6 @@ import {
     IWalletSensitiveData, IWalletUpdate,
 } from "./wallet.interfaces";
 import {AssertionUtils} from "../utils/assertion.utils";
-import {CurrentUserService} from "../common/service/current.user.service";
 import {IUserItem} from "../user/user.interfaces";
 
 @Injectable()
@@ -23,7 +22,6 @@ export class WalletService {
         private readonly redis: RedisClientType,
         private readonly repo: WalletRepository,
         private readonly cryptoService: CryptoService,
-        private readonly currentUser: CurrentUserService,
     ) {}
 
     private key(chatId: string, name: string): string {
@@ -117,14 +115,8 @@ export class WalletService {
         ]);
     }
 
-    getUserForAPI(): IUserItem {
-        const user: IUserItem = this.currentUser.user;
+    async createByAPI(user: IUserItem, data: IWalletCreate): Promise<IWalletAPIResult> {
         AssertionUtils.doesUserExist(user);
-        return user;
-    }
-
-    async createByAPI(data: IWalletCreate): Promise<IWalletAPIResult> {
-        const user: IUserItem = this.getUserForAPI();
         AssertionUtils.nameFieldFilled(data);
 
         if (!data.mnemonic) {
@@ -140,8 +132,8 @@ export class WalletService {
         };
     }
 
-    async findOneByAPI(name: string): Promise<IWalletAPIResult> {
-        const user: IUserItem = this.getUserForAPI();
+    async findOneByAPI(user: IUserItem, name: string): Promise<IWalletAPIResult> {
+        AssertionUtils.doesUserExist(user);
         name = this.prepareName(name);
 
         const key: string = this.key(user.chatId, name);
@@ -158,8 +150,8 @@ export class WalletService {
         };
     }
 
-    async listByAPI(): Promise<ReadonlyArray<IWalletAPIResult>> {
-        const user: IUserItem = this.getUserForAPI();
+    async listByAPI(user: IUserItem): Promise<ReadonlyArray<IWalletAPIResult>> {
+        AssertionUtils.doesUserExist(user);
 
         const list: ReadonlyArray<IWalletItem> = await this.repo.list(user.chatId);
 
@@ -168,8 +160,8 @@ export class WalletService {
         }));
     }
 
-    async updateByAPI(name: string, data: IWalletUpdate): Promise<IWalletAPIResult> {
-        const user: IUserItem = this.getUserForAPI();
+    async updateByAPI(user: IUserItem, name: string, data: IWalletUpdate): Promise<IWalletAPIResult> {
+        AssertionUtils.doesUserExist(user);
         name = this.prepareName(name);
         data.name = this.prepareName(data.name);
 
@@ -187,8 +179,8 @@ export class WalletService {
         };
     }
 
-    async removeByAPI(name: string) {
-        const user: IUserItem = this.getUserForAPI();
+    async removeByAPI(user: IUserItem, name: string) {
+        AssertionUtils.doesUserExist(user);
         name = this.prepareName(name);
 
         await this.remove(user.chatId, name);

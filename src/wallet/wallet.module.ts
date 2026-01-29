@@ -6,7 +6,6 @@ import {RedisModule} from "../redis/redis.module";
 import {WalletRepository} from "./wallet.repository";
 import {CryptoService} from "../crypto/crypto.service";
 import {WalletController} from "./wallet.controller";
-import {CurrentUserService} from "../common/service/current.user.service";
 
 @Module({
     controllers: [WalletController],
@@ -18,7 +17,6 @@ import {CurrentUserService} from "../common/service/current.user.service";
         WalletService,
         WalletRepository,
         CryptoService,
-        CurrentUserService,
     ],
     exports: [WalletService],
 })
