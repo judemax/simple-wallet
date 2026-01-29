@@ -5,6 +5,7 @@ import fastify from "fastify";
 
 import "reflect-metadata";
 import "es6-shim";
+import {HttpExceptionFilter} from "./common/filters/http.exception.filter";
 
 async function bootstrap() {
     const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
@@ -24,6 +25,7 @@ async function bootstrap() {
     });
 
     app.getHttpAdapter().getInstance().decorateRequest("user", null);
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     await app.listen(process.env.LISTEN_PORT, process.env.LISTEN_HOST);
     console.log(`Web server has been started on ${process.env.LISTEN_HOST}:${process.env.LISTEN_PORT}`);

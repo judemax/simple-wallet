@@ -173,7 +173,9 @@ export class WalletService {
         name = this.prepareName(name);
         data.name = this.prepareName(data.name);
 
-        const walletItem: IWalletItem = await this.repo.update(user.chatId, name, data);
+        const walletItem: IWalletItem | null = await this.repo.update(user.chatId, name, data);
+        AssertionUtils.doesWalletExists(walletItem);
+
         await this.redis.set(
             this.key(user.chatId, name),
             JSON.stringify(walletItem),

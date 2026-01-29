@@ -11,7 +11,7 @@ import {KafkaProducer} from "../kafka/kafka.producer";
 @Injectable()
 export class CommandRouter {
     constructor(
-        private readonly state: StateTelegramService,
+        protected readonly state: StateTelegramService,
         protected readonly registry: TGCommandRegistryService,
         protected readonly kafka: KafkaProducer,
     ) {}

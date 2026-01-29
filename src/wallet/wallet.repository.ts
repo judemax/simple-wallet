@@ -46,12 +46,12 @@ export class WalletRepository {
         await this.model.destroy({where: {chatId, name}});
     }
 
-    async get(chatId: string, name: string): Promise<IWalletItem> {
+    async get(chatId: string, name: string): Promise<IWalletItem | null> {
         const wallet: WalletModel = await this.model.findOne({
             where: {chatId, name},
             attributes: WalletModel.itemAttrs(),
         });
-        return wallet.getItem();
+        return wallet?.getItem() || null;
     }
 
     async list(chatId: string): Promise<ReadonlyArray<IWalletItem>> {
@@ -63,7 +63,7 @@ export class WalletRepository {
         return wallets.map(w => w.getItem());
     }
 
-    async update(chatId: string, name: string, data: IWalletUpdate): Promise<IWalletItem> {
+    async update(chatId: string, name: string, data: IWalletUpdate): Promise<IWalletItem | null> {
         const wallet: WalletModel = await this.sequelize.transaction(async (t) => {
             await this.model.update({
                 name: data.name,
@@ -77,6 +77,6 @@ export class WalletRepository {
                 transaction: t,
             });
         });
-        return wallet.getItem();
+        return wallet?.getItem() || null;
     }
 }
