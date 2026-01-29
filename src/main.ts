@@ -12,7 +12,18 @@ async function bootstrap() {
         new FastifyAdapter(fastify()),
     );
 
+    app.setGlobalPrefix("api");
+
+    app.enableCors({
+        origin: "*",
+        allowedHeaders: [
+            "Content-Type",
+            "X-Key",
+        ],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    });
+
     await app.listen(process.env.LISTEN_PORT, process.env.LISTEN_HOST);
-    console.log(`Web server has been started on port ${process.env.LISTEN_PORT}`);
+    console.log(`Web server has been started on ${process.env.LISTEN_HOST}:${process.env.LISTEN_PORT}`);
 }
 bootstrap().catch(console.error);
