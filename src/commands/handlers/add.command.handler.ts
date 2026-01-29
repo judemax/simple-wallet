@@ -25,6 +25,11 @@ export class AddCommandHandler extends BaseCommandHandler implements ITGCommandH
         await this.kafka.send("tg.outgoing", {
             chatId: msg.chatId,
             text: "Enter your mnemonic phrase:",
+            options: {
+                reply_markup: {
+                    remove_keyboard: true,
+                },
+            },
         });
     }
 
@@ -77,6 +82,11 @@ export class AddCommandHandler extends BaseCommandHandler implements ITGCommandH
         await this.kafka.send("tg.outgoing", {
             chatId: msg.chatId,
             text: "Enter the name of your wallet:",
+            options: {
+                reply_markup: {
+                    remove_keyboard: true,
+                },
+            },
         });
     }
 
