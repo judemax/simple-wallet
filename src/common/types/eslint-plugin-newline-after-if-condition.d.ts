@@ -1,4 +1,4 @@
-declare module "eslint-plugin-newline-after-if-condition" {
+declare module "src/common/types/eslint-plugin-newline-after-if-condition" {
     import {Rule} from "eslint";
 
     const plugin: {

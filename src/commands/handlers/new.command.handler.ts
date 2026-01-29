@@ -6,6 +6,7 @@ import {Reflector} from "@nestjs/core";
 import {StateTelegramService} from "../../telegram/state/state.telegram.service";
 import {KafkaProducer} from "../../kafka/kafka.producer";
 import {WalletService} from "../../wallet/wallet.service";
+import {IExtendedWalletItem} from "../../wallet/wallet.interfaces";
 
 @TGCommand("/new")
 @Injectable()
@@ -41,7 +42,7 @@ export class NewCommandHandler extends BaseCommandHandler implements ITGCommandH
     }
 
     async createWallet(msg: ITGCommandMessage, state: ITGCommandState) {
-        const mnemonic: string = await this.walletService.create(
+        const walletItem: IExtendedWalletItem = await this.walletService.create(
             msg.chatId,
             this.getStateText(msg, state, "SEND_NAME"),
         );
@@ -50,7 +51,7 @@ export class NewCommandHandler extends BaseCommandHandler implements ITGCommandH
         await this.kafka.send("tg.outgoing", {
             chatId: msg.chatId,
             text: `Wallet was successfully created
-Its mnemonic: <span class="tg-spoiler">${mnemonic}</span>`,
+Its mnemonic: <span class="tg-spoiler">${walletItem.mnemonic}</span>`,
         });
     }
 

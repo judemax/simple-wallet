@@ -3,8 +3,16 @@ import {REDIS} from "../redis/redis.module";
 import {RedisClientType} from "redis";
 import {WalletRepository} from "./wallet.repository";
 import {CryptoService} from "../crypto/crypto.service";
-import {IWalletCreationAttributes, IWalletItem, IWalletSensitiveData} from "./wallet.interfaces";
+import {
+    IExtendedWalletItem, IWalletAPIResult,
+    IWalletCreate,
+    IWalletCreationAttributes,
+    IWalletItem,
+    IWalletSensitiveData, IWalletUpdate,
+} from "./wallet.interfaces";
 import {AssertionUtils} from "../utils/assertion.utils";
+import {CurrentUserService} from "../common/service/current.user.service";
+import {IUserItem} from "../user/user.interfaces";
 
 @Injectable()
 export class WalletService {
@@ -15,6 +23,7 @@ export class WalletService {
         private readonly redis: RedisClientType,
         private readonly repo: WalletRepository,
         private readonly cryptoService: CryptoService,
+        private readonly currentUser: CurrentUserService,
     ) {}
 
     private key(chatId: string, name: string): string {
@@ -35,14 +44,17 @@ export class WalletService {
         return this.cryptoService.hashData(mnemonic, mainSalt);
     }
 
-    async create(chatId: string, name: string): Promise<string> {
+    async create(chatId: string, name: string): Promise<IExtendedWalletItem> {
         console.log(`[WALLET] Create new by ${chatId} with name ${name}`);
 
         const mnemonic: string = this.cryptoService.generateMnemonic();
 
-        await this.add(chatId, mnemonic, name);
+        const walletItem: IWalletItem = await this.add(chatId, mnemonic, name);
 
-        return mnemonic;
+        return {
+            ...walletItem,
+            mnemonic,
+        };
     }
 
     fullyCorrectMnemonic(mnemonic: string): boolean {
@@ -99,6 +111,84 @@ export class WalletService {
     }
 
     async remove(chatId: string, name: string) {
-        await this.repo.remove(chatId, this.prepareName(name));
+        await Promise.all([
+            this.redis.del(this.key(chatId, name)),
+            this.repo.remove(chatId, this.prepareName(name)),
+        ]);
+    }
+
+    getUserForAPI(): IUserItem {
+        const user: IUserItem = this.currentUser.user;
+        AssertionUtils.doesUserExist(user);
+        return user;
+    }
+
+    async createByAPI(data: IWalletCreate): Promise<IWalletAPIResult> {
+        const user: IUserItem = this.getUserForAPI();
+        AssertionUtils.nameFieldFilled(data);
+
+        if (!data.mnemonic) {
+            const walletItem: IExtendedWalletItem = await this.create(user.chatId, data.name);
+            return {
+                name: walletItem.name,
+                mnemonic: walletItem.mnemonic,
+            };
+        }
+        const walletItem: IWalletItem = await this.add(user.chatId, data.mnemonic, data.name);
+        return {
+            name: walletItem.name,
+        };
+    }
+
+    async findOneByAPI(name: string): Promise<IWalletAPIResult> {
+        const user: IUserItem = this.getUserForAPI();
+        name = this.prepareName(name);
+
+        const key: string = this.key(user.chatId, name);
+        const cached: string | object = await this.redis.get(key);
+        if (cached && (typeof cached === "string")) {
+            return JSON.parse(cached);
+        }
+
+        const walletItem: IWalletItem | null = await this.repo.get(user.chatId, name);
+        AssertionUtils.doesWalletExists(walletItem);
+
+        return {
+            name: walletItem.name,
+        };
+    }
+
+    async listByAPI(): Promise<ReadonlyArray<IWalletAPIResult>> {
+        const user: IUserItem = this.getUserForAPI();
+
+        const list: ReadonlyArray<IWalletItem> = await this.repo.list(user.chatId);
+
+        return list.map(l => ({
+            name: l.name,
+        }));
+    }
+
+    async updateByAPI(name: string, data: IWalletUpdate): Promise<IWalletAPIResult> {
+        const user: IUserItem = this.getUserForAPI();
+        name = this.prepareName(name);
+        data.name = this.prepareName(data.name);
+
+        const walletItem: IWalletItem = await this.repo.update(user.chatId, name, data);
+        await this.redis.set(
+            this.key(user.chatId, name),
+            JSON.stringify(walletItem),
+            {EX: this.ttl},
+        );
+
+        return {
+            name: walletItem.name,
+        };
+    }
+
+    async removeByAPI(name: string) {
+        const user: IUserItem = this.getUserForAPI();
+        name = this.prepareName(name);
+
+        await this.remove(user.chatId, name);
     }
 }

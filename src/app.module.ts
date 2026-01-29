@@ -9,6 +9,7 @@ import {CommandsModule} from "./commands/commands.module";
 import {StatePollingTelegramModule} from "./telegram/polling/state.polling.telegram.module";
 import {CryptoModule} from "./crypto/crypto.module";
 import {UserModule} from "./user/user.module";
+import {ApiModule} from "./api/api.module";
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import {UserModule} from "./user/user.module";
             synchronize: false,
             logging: process.env.DEBUG === "true" ? console.log : false,
         }),
+        ApiModule,
         RedisModule,
         KafkaModule,
         CryptoModule,

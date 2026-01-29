@@ -23,6 +23,8 @@ async function bootstrap() {
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     });
 
+    app.getHttpAdapter().getInstance().decorateRequest("user", null);
+
     await app.listen(process.env.LISTEN_PORT, process.env.LISTEN_HOST);
     console.log(`Web server has been started on ${process.env.LISTEN_HOST}:${process.env.LISTEN_PORT}`);
 }

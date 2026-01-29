@@ -1,6 +1,7 @@
 import {assertion} from "./assertion";
 import {IUserEncryptedItem, IUserItem} from "../user/user.interfaces";
 import {ITGCommandHandler, ITGCommandPrevStep, ITGCommandState} from "../commands/command.interfaces";
+import {IWalletCreate, IWalletItem} from "../wallet/wallet.interfaces";
 
 export class AssertionUtils {
     static doesTGDecoratorExist(command: string) {
@@ -33,5 +34,21 @@ export class AssertionUtils {
 
     static doesStepExist(step: ITGCommandPrevStep) {
         assertion(!!step, "step_not_exists", "Step not exists");
+    }
+
+    static isAPIKeyNotEmpty(apiKey: string) {
+        assertion(!!apiKey && typeof apiKey === "string", "key_is_empty", "API key is empty");
+    }
+
+    static isValidAPIKey(user: IUserItem | null) {
+        assertion(!!user, "invalid_key", "Invalid key");
+    }
+
+    static nameFieldFilled(data: IWalletCreate) {
+        assertion(!!data.name && typeof data.name === "string", "name_not_filled", "Send the name");
+    }
+
+    static doesWalletExists(wallet: IWalletItem | null) {
+        assertion(!!wallet, "wallet_not_exists", "Wallet not exists");
     }
 }

@@ -19,7 +19,25 @@ export interface IWalletItem {
     readonly mnemonicHash: string;
 }
 
+export interface IExtendedWalletItem extends IWalletItem {
+    readonly mnemonic: string;
+}
+
 export interface IWalletEncryptedItem {
     readonly walletSalt: string;
     readonly encrypted: string;
+}
+
+export interface IWalletCreate {
+    readonly name: string;
+    readonly mnemonic?: string;
+}
+
+export interface IWalletUpdate {
+    name: string;
+}
+
+export interface IWalletAPIResult {
+    readonly name: string;
+    readonly mnemonic?: string;
 }

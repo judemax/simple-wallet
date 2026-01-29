@@ -32,11 +32,16 @@ export class UserService {
         ]);
     }
 
+    private getAPIKeyHash(apiKey: string): string {
+        const mainSalt: string = process.env.APP_SALT || "";
+        return this.cryptoService.hashData(apiKey, mainSalt);
+    }
+
     private generateUser(chatId: string): IUserCreationAttributes {
         const userSalt: string = this.cryptoService.generateSalt();
         const apiKey: string = this.cryptoService.generateSalt();
         const mainSalt: string = process.env.APP_SALT || "";
-        const apiKeyHash: string = this.cryptoService.hashData(apiKey, mainSalt);
+        const apiKeyHash: string = this.getAPIKeyHash(apiKey);
         const data: IUserSensitiveData = {apiKey};
         const encrypted: string = this.cryptoService.encrypt(data, mainSalt, userSalt);
 
@@ -67,7 +72,8 @@ export class UserService {
         return userItem;
     }
 
-    async getByAPIKey(apiKeyHash: string): Promise<IUserItem | null> {
+    async getByAPIKey(apiKey: string): Promise<IUserItem | null> {
+        const apiKeyHash: string = this.getAPIKeyHash(apiKey);
         const key: string = this.keyByAPIKey(apiKeyHash);
         const chatId: string | object = await this.redis.get(key);
         if (chatId && (typeof chatId === "string")) {
