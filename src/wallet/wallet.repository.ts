@@ -47,7 +47,7 @@ export class WalletRepository {
     }
 
     async get(chatId: string, name: string): Promise<IWalletItem | null> {
-        const wallet: WalletModel = await this.model.findOne({
+        const wallet: WalletModel | null = await this.model.findOne({
             where: {chatId, name},
             attributes: WalletModel.itemAttrs(),
         });
@@ -64,7 +64,7 @@ export class WalletRepository {
     }
 
     async update(chatId: string, name: string, data: IWalletUpdate): Promise<IWalletItem | null> {
-        const wallet: WalletModel = await this.sequelize.transaction(async (t) => {
+        const wallet: WalletModel | null = await this.sequelize.transaction(async (t) => {
             await this.model.update({
                 name: data.name,
             }, {

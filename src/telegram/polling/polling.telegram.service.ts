@@ -32,9 +32,9 @@ export class PollingTelegramService implements OnModuleInit, OnModuleDestroy {
 
         while (this.running) {
             try {
-                const result: ITGGetUpdates = await this.bot.getUpdates(offset);
+                const result: ITGGetUpdates | null = await this.bot.getUpdates(offset);
 
-                if (!result?.ok) {
+                if (!result?.ok || !result.result?.length) {
                     await this.sleep(1000);
                     continue;
                 }

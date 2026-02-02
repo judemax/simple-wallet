@@ -11,26 +11,26 @@ export class UserModel extends Model<UserModel, IUserCreationAttributes> {
         type: DataType.STRING(64),
         primaryKey: true,
     })
-    readonly chatId: string;
+    readonly chatId!: string;
 
     @Column({
         type: DataType.STRING(64),
         allowNull: false,
     })
-    readonly userSalt: string;
+    readonly userSalt!: string;
 
     @Column({
         type: DataType.STRING(64),
         allowNull: false,
         unique: true,
     })
-    readonly apiKeyHash: string;
+    readonly apiKeyHash!: string;
 
     @Column({
         type: DataType.TEXT("long"),
         allowNull: false,
     })
-    readonly encrypted: string;
+    readonly encrypted!: string;
 
     @HasMany(() => WalletModel, {
         onDelete: "CASCADE",
@@ -48,7 +48,7 @@ export class UserModel extends Model<UserModel, IUserCreationAttributes> {
     }
 
     getItem(): IUserItem {
-        const data: Partial<IUserData> = this.toJSON();
+        const data: IUserData = this.toJSON();
         return {
             chatId: data.chatId,
             userSalt: data.userSalt,
@@ -57,7 +57,7 @@ export class UserModel extends Model<UserModel, IUserCreationAttributes> {
     }
 
     getEncryptedItem(): IUserEncryptedItem {
-        const data: Partial<IUserData> = this.toJSON();
+        const data: IUserData = this.toJSON();
         return {
             userSalt: data.userSalt,
             encrypted: data.encrypted,

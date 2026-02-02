@@ -5,5 +5,5 @@ export const TGBOT: symbol = Symbol("TGBOT");
 
 export const tgBotProvider: Provider = {
     provide: TGBOT,
-    useFactory: () => new TGBot(process.env.TG_BOT_TOKEN),
+    useFactory: () => new TGBot(process.env.TG_BOT_TOKEN || "test"),
 };

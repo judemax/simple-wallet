@@ -16,7 +16,7 @@ export class ApiGuard implements CanActivate {
         const apiKey: string = typeof req.headers["x-key"] === "string" ? req.headers["x-key"] : "";
         AssertionUtils.isAPIKeyNotEmpty(apiKey);
 
-        const user: IUserItem = await this.userService.getByAPIKey(apiKey);
+        const user: IUserItem | null = await this.userService.getByAPIKey(apiKey);
         AssertionUtils.isValidAPIKey(user);
 
         req.user = user;

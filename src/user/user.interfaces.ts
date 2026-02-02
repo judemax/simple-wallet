@@ -9,7 +9,7 @@ export interface IUserData {
     readonly chatId: string;
     readonly userSalt: string;
     readonly apiKeyHash: string;
-    readonly encrypted?: string;
+    readonly encrypted: string;
 }
 
 export interface IUserSensitiveData {

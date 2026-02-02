@@ -18,7 +18,7 @@ export class CommandRouter {
 
     private async handleCommand(msg: ITGCommandMessage, state?: ITGCommandState) {
         const command: string = state?.command || msg.text.split(/\s+/)[0];
-        const handler: ITGCommandHandler = this.registry.get(command);
+        const handler: ITGCommandHandler | undefined = this.registry.get(command);
         AssertionUtils.isCommandKnown(handler, command);
         await handler.handle(msg, state);
     }
@@ -49,7 +49,7 @@ export class CommandRouter {
                 return;
             }
 
-            const state: ITGCommandState = await this.state.get(msg.chatId);
+            const state: ITGCommandState | null = await this.state.get(msg.chatId);
             if (!state) {
                 return;
             }

@@ -9,7 +9,7 @@ export class AssertionError extends Error {
 }
 
 export function assertion(
-    condition: boolean | number | string | object,
+    condition: boolean | number | string | object | undefined,
     errorCode: string,
     errorMessage: string,
 ): boolean {

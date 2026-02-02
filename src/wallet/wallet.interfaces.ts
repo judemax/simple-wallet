@@ -39,5 +39,8 @@ export interface IWalletUpdate {
 
 export interface IWalletAPIResult {
     readonly name: string;
-    readonly mnemonic?: string;
+}
+
+export interface IWalletAPIExtendedResult extends IWalletAPIResult {
+    readonly mnemonic: string;
 }

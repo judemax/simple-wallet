@@ -20,7 +20,7 @@ export class StatePollingTelegramService {
 
     async get(botId: string): Promise<number> {
         const key: string = this.key(botId);
-        const cached: string | object = await this.redis.get(key);
+        const cached: string | object | null = await this.redis.get(key);
         if (cached && (typeof cached === "string")) {
             return JSON.parse(cached).offset;
         }

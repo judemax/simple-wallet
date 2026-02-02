@@ -7,7 +7,7 @@ import {KAFKA_CONSUMER} from "./kafka.consumer.decorator";
 
 @Injectable()
 export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
-    private consumer: Consumer;
+    private consumer!: Consumer;
 
     constructor(
         @Inject(KAFKA)private readonly kafka: Kafka,

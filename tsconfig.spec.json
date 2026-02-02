@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "types": ["jest", "node"],
+    "esModuleInterop": true,
+    "allowJs": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": false,
+    "outDir": "./dist-types",
+    "composite": true
+  },
+  "include": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "tests/**/*.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

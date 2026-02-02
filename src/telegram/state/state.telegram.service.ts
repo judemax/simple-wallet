@@ -21,7 +21,7 @@ export class StateTelegramService {
 
     async get(chatId: string): Promise<ITGCommandState | null> {
         const key: string = this.key(chatId);
-        const cached: string | object = await this.redis.get(key);
+        const cached: string | object | null = await this.redis.get(key);
         if (cached && (typeof cached === "string")) {
             return JSON.parse(cached);
         }

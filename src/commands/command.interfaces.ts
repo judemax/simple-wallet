@@ -16,7 +16,7 @@ export interface ITGCommandPrevStep {
 export interface ITGCommandState {
     readonly command: string;
     readonly nextStep?: string;
-    readonly prev?: ReadonlyArray<ITGCommandPrevStep>;
+    readonly prev: ReadonlyArray<ITGCommandPrevStep>;
 }
 
 export interface ITGCommandHandler {

@@ -11,14 +11,16 @@ export class TGBot {
     protected readonly token: string;
     protected webhook: string;
     protected readonly tgServer: string;
-    protected cb: TTGCB;
+    protected cb: TTGCB | null;
 
     constructor(token: string, tgServer?: string) {
         this.token = token || "test";
         this.tgServer = tgServer || "https://api.telegram.org";
+        this.webhook = "";
+        this.cb = null;
     }
 
-    private async realAPIRequest<P, R>(method: string, parameters: P): Promise<R> {
+    private async realAPIRequest<P, R>(method: string, parameters: P): Promise<R | null> {
         const r: Response = await fetch(`${this.tgServer}/bot${this.token}/${method}`, {
             headers: {
                 "content-type": "application/json; charset=utf-8",
@@ -29,14 +31,14 @@ export class TGBot {
         return r.json();
     }
 
-    private apiRequest<P, R>(method: string, parameters: P): Promise<R> {
+    private apiRequest<P, R>(method: string, parameters: P): Promise<R | null> {
         if (this.token.includes("test")) {
-            return null;
+            return Promise.resolve(null);
         }
         return this.realAPIRequest(method, parameters);
     }
 
-    getBotId() {
+    getBotId(): string {
         return this.token.split(":")[0];
     }
 
@@ -56,13 +58,13 @@ export class TGBot {
         });
     }
 
-    deleteWebhook<P, R>(options: P): Promise<R> {
+    deleteWebhook<P, R>(options: P): Promise<R | null> {
         return this.apiRequest("deleteWebhook", {...options});
     }
 
-    sendMessage<P extends ITGBaseOptions, R>(text: string, options: P): Promise<R> {
+    sendMessage<P extends ITGBaseOptions, R>(text: string, options: P): Promise<R | null> {
         if (!options.chat_id) {
-            return null;
+            return Promise.resolve(null);
         }
         return this.apiRequest("sendMessage", {
             text,
@@ -78,12 +80,12 @@ export class TGBot {
         messageId: number,
         replyMarkup: string,
         options: P,
-    ): Promise<R> {
+    ): Promise<R | null> {
         return this.apiRequest("editMessageReplyMarkup", {
             message_id: messageId,
             reply_markup: replyMarkup,
-            chat_id: chatId,
             ...options,
+            chat_id: chatId,
         });
     };
 
@@ -92,19 +94,19 @@ export class TGBot {
         messageId: number,
         text: string,
         options: P,
-    ): Promise<R> {
+    ): Promise<R | null> {
         return this.apiRequest("editMessageText", {
-            chat_id: chatId,
             message_id: messageId,
             disable_web_page_preview: true,
             disable_notification: false,
             parse_mode: "HTML",
             text,
             ...options,
+            chat_id: chatId,
         });
     }
 
-    getUpdates(offset: number = 0): Promise<ITGGetUpdates> {
+    getUpdates(offset: number = 0): Promise<ITGGetUpdates | null> {
         const parameters: ITGGetUpdatesOptions = {};
         if (offset > 0) {
             parameters.offset = offset;
@@ -112,8 +114,8 @@ export class TGBot {
         return this.apiRequest("getUpdates", parameters);
     }
 
-    async sendSimpleChatMessage<R>(chatIds: string[], text: string): Promise<R> {
-        let lastResult: R = null;
+    async sendSimpleChatMessage<R>(chatIds: string[], text: string): Promise<R | null> {
+        let lastResult: R | null = null;
         text = text.trim().split("\n").map(l => l.trim()).join("\n");
         for (const chatId of chatIds) {
             lastResult = await this.sendMessage(text, {chat_id: chatId});
@@ -121,12 +123,12 @@ export class TGBot {
         return lastResult;
     }
 
-    async getFile(fileId: string): Promise<ITGFile> {
-        const file: ITGFileResult = await this.apiRequest("getFile", {file_id: fileId});
-        return file.result;
+    async getFile(fileId: string): Promise<ITGFile | undefined> {
+        const file: ITGFileResult | null = await this.apiRequest("getFile", {file_id: fileId});
+        return file?.result;
     }
 
-    deleteMessages<R>(chatId: string, messageIds: ReadonlyArray<number>): Promise<R> {
+    deleteMessages<R>(chatId: string, messageIds: ReadonlyArray<number>): Promise<R | null> {
         return this.apiRequest("deleteMessages", {
             chat_id: chatId,
             message_ids: messageIds,

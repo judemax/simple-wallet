@@ -55,7 +55,7 @@ export class UserService {
 
     async getByChatId(chatId: string): Promise<IUserItem> {
         const key: string = this.keyByChatId(chatId);
-        const cached: string | object = await this.redis.get(key);
+        const cached: string | object | null = await this.redis.get(key);
         if (cached && (typeof cached === "string")) {
             return JSON.parse(cached);
         }
@@ -75,7 +75,7 @@ export class UserService {
     async getByAPIKey(apiKey: string): Promise<IUserItem | null> {
         const apiKeyHash: string = this.getAPIKeyHash(apiKey);
         const key: string = this.keyByAPIKey(apiKeyHash);
-        const chatId: string | object = await this.redis.get(key);
+        const chatId: string | object | null = await this.redis.get(key);
         if (chatId && (typeof chatId === "string")) {
             return this.getByChatId(chatId);
         }

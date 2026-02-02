@@ -122,6 +122,15 @@ export default defineConfig([
             "semi-spacing": "error",
         },
     },
+    {
+        files: ["tests/**/*.ts"],
+        languageOptions: {
+            globals: {...globals.jest},
+        },
+        rules: {
+            "@typescript-eslint/no-explicit-any": "off",
+        },
+    },
     {ignores: [
         "package-lock.json",
         "dist",

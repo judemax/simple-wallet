@@ -39,7 +39,7 @@ export class BaseCommandHandler {
         if (state.nextStep === name) {
             return msg.text;
         }
-        const step: ITGCommandPrevStep = state.prev.findLast(s => s.step === name);
+        const step: ITGCommandPrevStep | undefined = state.prev.findLast(s => s.step === name);
         AssertionUtils.doesStepExist(step);
         return step.text;
     }

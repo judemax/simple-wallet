@@ -16,32 +16,32 @@ export class WalletModel extends Model<WalletModel, IWalletCreationAttributes> {
         allowNull: false,
     })
     @ForeignKey(() => UserModel)
-    readonly chatId: string;
+    readonly chatId!: string;
 
     @Column({
         type: DataType.STRING(64),
         allowNull: false,
     })
-    readonly name: string;
+    readonly name!: string;
 
     @Column({
         type: DataType.STRING(64),
         allowNull: false,
     })
-    readonly walletSalt: string;
+    readonly walletSalt!: string;
 
     @Column({
         type: DataType.STRING(64),
         allowNull: false,
         unique: true,
     })
-    readonly mnemonicHash: string;
+    readonly mnemonicHash!: string;
 
     @Column({
         type: DataType.TEXT("long"),
         allowNull: false,
     })
-    readonly encrypted: string;
+    readonly encrypted!: string;
 
     static itemAttrs(): string[] {
         return ["chatId", "name", "walletSalt", "mnemonicHash"];
@@ -52,7 +52,7 @@ export class WalletModel extends Model<WalletModel, IWalletCreationAttributes> {
     }
 
     getItem(): IWalletItem {
-        const data: Partial<IWalletData> = this.toJSON();
+        const data: IWalletData = this.toJSON();
         return {
             chatId: data.chatId,
             name: data.name,
@@ -62,10 +62,10 @@ export class WalletModel extends Model<WalletModel, IWalletCreationAttributes> {
     }
 
     getEncryptedItem(): IWalletEncryptedItem {
-        const data: Partial<IWalletData> = this.toJSON();
+        const data: IWalletData = this.toJSON();
         return {
             walletSalt: data.walletSalt,
-            encrypted: data.walletSalt,
+            encrypted: data.encrypted,
         };
     }
 }

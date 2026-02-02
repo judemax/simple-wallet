@@ -17,10 +17,13 @@ export class TelegramUpdateService {
     }
 
     async handle(upd: ITGUpdate) {
+        if (!upd?.message) {
+            return;
+        }
         const event: ITGCommandMessage = {
             botId: this.bot.getBotId(),
             chatId: upd.message.chat.id.toString(),
-            text: upd.message.text,
+            text: upd.message.text || "",
             messageId: upd.message.message_id,
             raw: upd,
         };
