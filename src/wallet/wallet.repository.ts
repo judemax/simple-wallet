@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectModel} from "@nestjs/sequelize";
 import {WalletModel} from "./wallet.model";
-import {IWalletCreationAttributes, IWalletItem, IWalletUpdate} from "./wallet.interfaces";
+import {IWalletCreationAttributes, IWalletEncryptedItem, IWalletItem, IWalletUpdate} from "./wallet.interfaces";
 import {Sequelize} from "sequelize-typescript";
 
 @Injectable()
@@ -54,7 +54,15 @@ export class WalletRepository {
         return wallet?.getItem() || null;
     }
 
-    async list(chatId: string): Promise<ReadonlyArray<IWalletItem>> {
+    async getEncrypted(chatId: string, name: string): Promise<IWalletEncryptedItem | null> {
+        const wallet: WalletModel | null = await this.model.findOne({
+            where: {chatId, name},
+            attributes: WalletModel.encryptedItemAttrs(),
+        });
+        return wallet?.getEncryptedItem() || null;
+    }
+
+    async listByAPI(chatId: string): Promise<ReadonlyArray<IWalletItem>> {
         const wallets: WalletModel[] = await this.model.findAll({
             where: {chatId},
             attributes: WalletModel.itemAttrs(),

@@ -31,6 +31,12 @@
     "src/common/types/**/*",
     "eslint.config.ts"
   ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "tests/**/*.ts",
+    "dist"
+  ],
   "references": [{
       "path": "./tsconfig.spec.json"
   }]

@@ -26,7 +26,7 @@ describe("WalletService", () => {
         repo = {
             add: jest.fn(),
             get: jest.fn(),
-            list: jest.fn(),
+            listByAPI: jest.fn(),
             listByChatId: jest.fn(),
             update: jest.fn(),
             remove: jest.fn(),
@@ -319,7 +319,7 @@ describe("WalletService", () => {
                 "cold",
             ];
 
-            repo.list.mockResolvedValue(wallets.map(w => ({
+            repo.listByAPI.mockResolvedValue(wallets.map(w => ({
                 chatId: "1",
                 name: w,
                 walletSalt: "walletSalt",
@@ -330,8 +330,8 @@ describe("WalletService", () => {
                 chatId: "1",
             } as any);
 
-            expect(repo.list).toHaveBeenCalledTimes(1);
-            expect(repo.list).toHaveBeenCalledWith("1");
+            expect(repo.listByAPI).toHaveBeenCalledTimes(1);
+            expect(repo.listByAPI).toHaveBeenCalledWith("1");
             expect(result).toEqual(wallets.map(w => ({name: w})));
         });
     });

@@ -168,7 +168,7 @@ export class WalletService {
     async listByAPI(user: IUserItem): Promise<ReadonlyArray<IWalletAPIResult>> {
         AssertionUtils.doesUserExist(user);
 
-        const list: ReadonlyArray<IWalletItem> = await this.repo.list(user.chatId);
+        const list: ReadonlyArray<IWalletItem> = await this.repo.listByAPI(user.chatId);
 
         return list.map(l => ({
             name: l.name,
@@ -180,6 +180,7 @@ export class WalletService {
         name = this.prepareName(name);
         data.name = this.prepareName(data.name);
 
+        AssertionUtils.doesWalletNameNotExist(!(await this.nameAlreadyExists(user.chatId, data.name)), data.name);
         const walletItem: IWalletItem | null = await this.repo.update(user.chatId, name, data);
         AssertionUtils.doesWalletExists(walletItem);
 
